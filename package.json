@@ -1,0 +1,21 @@
+{
+  "name": "orng",
+  "version": "0.1.0",
+  "description": "Node.js wrapper around the Orangutan event dispatching tool",
+  "main": "index.js",
+  "author": "Eli Perelman",
+  "license": "MIT",
+  "keywords": [
+    "testing",
+    "firefox-os",
+    "b2g"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eliperelman/node-orng.git"
+  },
+  "dependencies": {
+    "adbkit": "^2.1.5",
+    "promise": "^6.0.1"
+  }
+}
