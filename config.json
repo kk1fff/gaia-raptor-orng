@@ -2,8 +2,8 @@
   "events": {
     "drag": "drag %d %d %d %d %d %d",
     "sleep": "sleep %d",
-    "tap": "tap %d %d %d 100",
-    "doubleTap": "tap %d %d 2 100",
+    "tap": "tap %d %d %d 1",
+    "doubleTap": "tap %d %d 2 1",
     "keydown": "keydown %d",
     "keyup": "keyup %d"
   },

@@ -4,16 +4,16 @@ var util = require('util');
 var exec = require('./exec');
 var config = require('./config.json');
 
-var Orng = function(deviceId, callback) {
+var Orng = function(serial, callback) {
   if (!(this instanceof Orng)) {
-    return new Orng(deviceId, callback);
+    return new Orng(serial, callback);
   }
 
   var orng = this;
 
-  if (typeof deviceId === 'function') {
-    callback = deviceId;
-    deviceId = null;
+  if (typeof serial === 'function') {
+    callback = serial;
+    serial = null;
   }
 
   this.client = adb.createClient();
@@ -21,21 +21,26 @@ var Orng = function(deviceId, callback) {
   this.client
     .listDevices()
     .then(function(devices) {
-      if (!deviceId) {
-        orng.device = devices[0];
+      if (!serial) {
+        orng.deviceId = devices[0].id;
       } else {
         devices.forEach(function(device) {
-          if (device.id === deviceId) {
-            orng.device = device;
+          if (device.id === serial) {
+            orng.deviceId = device.id;
           }
         });
       }
 
       orng.client
-        .getProperties(orng.device.id)
+        .getProperties(orng.deviceId)
         .then(function(properties) {
-          orng.deviceName = properties['ro.product.model'];
-          return orng.install()
+          var model = properties['ro.product.model'];
+
+          orng.devicePixelRatio = properties['ro.sf.lcd_density'] / 160;
+          orng.device = config.devices.b2g[model] ||
+            config.devices.android[model];
+
+          return orng.install();
         })
         .then(function() {
           callback.call(orng, orng);
@@ -44,22 +49,29 @@ var Orng = function(deviceId, callback) {
 };
 
 Orng.prototype.install = function() {
-  return this.client.push(this.device.id,
-    path.join(__dirname, 'orng'),
-    '/data/local/orng');
+  var client = this.client;
+  var deviceId = this.deviceId;
+
+  return client
+    .push(deviceId, path.join(__dirname, 'orng'), '/data/local/orng')
+    .then(function() {
+      return client.shell(deviceId, 'chmod 777 /data/local/orng');
+    });
 };
 
 Orng.prototype.trigger = function() {
-  return this.client.shell([
+  var command = [
     '/data/local/orng',
-    config[orng.deviceName].inputDevice,
+    this.device.inputDevice,
     '/data/local/tmp/orng-cmd'
-  ]);
+  ].join(' ');
+
+  return this.client.shell(this.deviceId, command);
 };
 
 Orng.prototype.copyCommand = function(command) {
   var script = util.format('echo "%s" > /data/local/tmp/orng-cmd', command);
-  return this.client.shell(this.device.id, script);
+  return this.client.shell(this.deviceId, script);
 };
 
 Object
