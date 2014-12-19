@@ -1,7 +1,6 @@
 var adb = require('adbkit');
 var path = require('path');
 var util = require('util');
-var exec = require('./exec');
 var config = require('./config.json');
 
 var Orng = function(serial, callback) {
