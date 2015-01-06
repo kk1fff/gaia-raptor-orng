@@ -35,9 +35,11 @@ var Orng = function(serial, callback) {
         .then(function(properties) {
           var model = properties['ro.product.model'];
 
-          orng.devicePixelRatio = properties['ro.sf.lcd_density'] / 160;
           orng.device = config.devices.b2g[model] ||
             config.devices.android[model];
+          var densityProperty = orng.device.densityProperty ||
+            'ro.sf.lcd_density';
+          orng.devicePixelRatio = properties[densityProperty] / 160;
 
           return orng.install();
         })
